@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "271836857839",
+    "project_id": "curso-frontend-issd-nmar-6500c",
+    "storage_bucket": "curso-frontend-issd-nmar-6500c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:271836857839:android:101a51c6a1ca98a79ca21a",
+        "android_client_info": {
+          "package_name": "com.example.burguer_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu7PjGJeUyYvYL0xcUfAIPCEJEWBct_es"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

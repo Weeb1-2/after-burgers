@@ -1,0 +1,48 @@
+name: burguer_app
+description: "After Burgers - Mobile Experience"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.5
+  google_fonts: ^6.2.1
+  lottie: ^3.1.0 # <--- Agregado aquí para que funcione en la app
+  supabase_flutter: ^2.12.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - "assets/lottie/Ready For Delivery.json" # <--- Ruta de tu animación agregada
+
+# CONFIGURACIÓN DEL ICONO
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo_after.png"
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/images/logo_after.png"
+
+# CONFIGURACIÓN DE LA SPLASH SCREEN
+flutter_native_splash:
+  color: "#000000"
+  image: "assets/images/1.png"
+  android_12:
+    image: "assets/images/1.png"
+    color: "#000000"
+  fullscreen: true
