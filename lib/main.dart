@@ -175,15 +175,6 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
         );
       }).toList();
 
-      // INSERTAR PROMOCIÓN MANUAL AL INICIO
-      listaCargada.insert(0, Burger(
-        nombre: "CLÁSICA + MEDALLÓN",
-        precio: "11500",
-        imagePath: "assets/images/promo_clasica.png",
-        descripcion: "Nuestra clásica burger con un medallón extra de carne y porción de papas.",
-        ingredientes: ["Doble Carne", "Doble Cheddar", "Papas Fritas"],
-      ));
-
       setState(() {
         misBurgers = listaCargada;
         cargandoProductos = false;
