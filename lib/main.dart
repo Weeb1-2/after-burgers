@@ -70,7 +70,7 @@ class Burger {
     required this.precio,
     required this.imagePath,
     required this.descripcion,
-    required this.ingredientes, // Ahora coincide perfectamente con el nombre de la variable arriba
+    required this.ingredientes,
   });
 }
 
@@ -94,7 +94,6 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
   bool ignoreTimeRestriction = false;
   bool cargandoProductos = true;
 
-  // Lista dinámica que se llenará con Supabase
   List<Burger> misBurgers = [];
 
   @override
@@ -104,7 +103,6 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     _shimmerController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat();
     _cartBadgeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
-    // Iniciamos la carga de datos
     _inicializarApp();
   }
 
@@ -113,7 +111,6 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     await _obtenerProductosDesdeSupabase();
   }
 
-  // FUNCIÓN CORREGIDA: Mapeo de datos desde Supabase
   Future<void> _obtenerProductosDesdeSupabase() async {
     try {
       final data = await supabase.from('productos').select();
@@ -130,7 +127,7 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       setState(() {
         misBurgers = listaCargada;
         cargandoProductos = false;
-        _actualizarFavorita(); // Actualizamos favorita una vez cargado
+        _actualizarFavorita();
       });
     } catch (e) {
       debugPrint("Error cargando productos: $e");
@@ -173,6 +170,37 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     if (pedidosRealizados < 5) return "NOVATO 🥩";
     if (pedidosRealizados < 15) return "BURGER LOVER 🍔";
     return "AFTER LEGEND 👑";
+  }
+
+  // --- FUNCIÓN AGREGADA: LOGIN PARA COCINA ---
+  void _mostrarLoginAdmin() {
+    final passController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF0D0D0D),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: Color(0xFF00E5FF))),
+        title: Text("ACCESO RESTRINGIDO", style: GoogleFonts.bebasNeue(color: const Color(0xFF00E5FF))),
+        content: TextField(
+          controller: passController,
+          obscureText: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(labelText: "Contraseña", labelStyle: TextStyle(color: Colors.white38)),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCELAR")),
+          ElevatedButton(
+            onPressed: () {
+              if (passController.text == "1234") {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const KitchenPanel()));
+              }
+            },
+            child: const Text("ENTRAR"),
+          )
+        ],
+      ),
+    );
   }
 
   void _agregarAlCarrito(Burger burger, {int personas = 1, List<String> quitados = const []}) {
@@ -474,7 +502,11 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
         children: [
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text("AFTER", style: GoogleFonts.bebasNeue(fontSize: 14, letterSpacing: 5, color: Colors.white24)),
-            Text("BURGERS", style: GoogleFonts.bebasNeue(fontSize: 32, fontWeight: FontWeight.bold, color: accent)),
+            // --- MODIFICADO: ACCESO OCULTO POR LONG PRESS ---
+            GestureDetector(
+              onLongPress: _mostrarLoginAdmin,
+              child: Text("BURGERS", style: GoogleFonts.bebasNeue(fontSize: 32, fontWeight: FontWeight.bold, color: accent)),
+            ),
           ]),
           GestureDetector(
             onLongPress: () {
@@ -801,5 +833,83 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     _shimmerController.dispose();
     _cartBadgeController.dispose();
     super.dispose();
+  }
+}
+
+// --- PANTALLA DE COCINA COMPLETA ---
+class KitchenPanel extends StatefulWidget {
+  const KitchenPanel({super.key});
+  @override
+  State<KitchenPanel> createState() => _KitchenPanelState();
+}
+
+class _KitchenPanelState extends State<KitchenPanel> {
+  final Color accent = const Color(0xFF00E5FF);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("PANTALLA DE COMANDAS", style: GoogleFonts.bebasNeue(letterSpacing: 2)),
+        backgroundColor: Colors.black,
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white24), onPressed: () => Navigator.pop(context)),
+      ),
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: Supabase.instance.client.from('pedidos').stream(primaryKey: ['id']).order('id', ascending: false),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          final pedidos = snapshot.data!;
+          if (pedidos.isEmpty) return const Center(child: Text("Sin pedidos pendientes 🍔", style: TextStyle(color: Colors.white24)));
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(20),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 1,
+              childAspectRatio: 1.2,
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+            ),
+            itemCount: pedidos.length,
+            itemBuilder: (context, index) => _buildPedidoCard(pedidos[index]),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPedidoCard(Map<String, dynamic> pedido) {
+    final DateTime fecha = DateTime.parse(pedido['created_at'] ?? DateTime.now().toString());
+    final int minutos = DateTime.now().difference(fecha).inMinutes;
+    Color colorEstado = Colors.greenAccent;
+    if (minutos > 15) colorEstado = Colors.orangeAccent;
+    if (minutos > 25) colorEstado = Colors.redAccent;
+
+    return Container(
+      decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(20), border: Border.all(color: colorEstado.withOpacity(0.5), width: 2)),
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Expanded(child: Text(pedido['cliente'].toString().toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white), overflow: TextOverflow.ellipsis)),
+            Text("${minutos}m", style: TextStyle(color: colorEstado, fontWeight: FontWeight.bold)),
+          ]),
+          Text(pedido['direccion'] ?? '', style: const TextStyle(color: Colors.white38, fontSize: 11)),
+          const Divider(color: Colors.white10),
+          Expanded(child: ListView(children: (pedido['items'] as List).map((item) => Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text("• ${item['cantidad']}x ${item['nombre']}", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            if (item['sin'] != null && (item['sin'] as List).isNotEmpty) Text("   SIN: ${(item['sin'] as List).join(', ')}", style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontStyle: FontStyle.italic)),
+          ]))).toList())),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: colorEstado.withOpacity(0.2), minimumSize: const Size(double.infinity, 45)),
+            onPressed: () async {
+              await Supabase.instance.client.from('pedidos').delete().eq('id', pedido['id']);
+            },
+            child: const Text("DESPACHAR", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+    );
   }
 }
