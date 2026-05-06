@@ -59,7 +59,10 @@ class CartItem {
 }
 
 class Burger {
-  final String nombre, precio, imagePath, descripcion;
+  final String nombre;
+  final String precio;
+  final String imagePath;
+  final String descripcion;
   final List<String> ingredientes;
 
   Burger({
@@ -67,8 +70,8 @@ class Burger {
     required this.precio,
     required this.imagePath,
     required this.descripcion,
-    required this.ingredients, // Corregido el nombre del parámetro si fuera necesario, pero mantengo 'ingredientes' por tu modelo
-  }) : ingredientes = ingredientes;
+    required this.ingredientes, // Ahora coincide perfectamente con el nombre de la variable arriba
+  });
 }
 
 class MainMenuEvo extends StatefulWidget {
@@ -110,23 +113,24 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     await _obtenerProductosDesdeSupabase();
   }
 
-  // NUEVA FUNCIÓN: Trae los precios y productos desde la tabla 'productos'
+  // FUNCIÓN CORREGIDA: Mapeo de datos desde Supabase
   Future<void> _obtenerProductosDesdeSupabase() async {
     try {
       final data = await supabase.from('productos').select();
       final List<Burger> listaCargada = (data as List).map((res) {
         return Burger(
-          nombre: res['nombre'],
+          nombre: res['nombre'] ?? 'Sin nombre',
           precio: res['precio'].toString(),
-          imagePath: res['image_path'],
-          descripcion: res['descripcion'],
-          ingredientes: List<String>.from(res['ingredientes']),
+          imagePath: res['image_path'] ?? '',
+          descripcion: res['descripcion'] ?? '',
+          ingredientes: List<String>.from(res['ingredientes'] ?? []),
         );
       }).toList();
 
       setState(() {
         misBurgers = listaCargada;
         cargandoProductos = false;
+        _actualizarFavorita(); // Actualizamos favorita una vez cargado
       });
     } catch (e) {
       debugPrint("Error cargando productos: $e");
@@ -141,7 +145,6 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       nombreGuardado = prefs.getString('cliente_nombre') ?? "";
       direccionGuardada = prefs.getString('cliente_direccion') ?? "";
     });
-    // La favorita se calcula después de tener los productos cargados
   }
 
   void _actualizarFavorita() {
@@ -371,7 +374,6 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       setState(() {
         carrito.clear();
         pedidosRealizados = nuevosPedidos;
-        _cargarDatosPersistentes();
         _actualizarFavorita();
       });
     } catch (e) {
