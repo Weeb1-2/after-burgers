@@ -172,7 +172,6 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     return "AFTER LEGEND 👑";
   }
 
-  // --- FUNCIÓN AGREGADA: LOGIN PARA COCINA ---
   void _mostrarLoginAdmin() {
     final passController = TextEditingController();
     showDialog(
@@ -500,18 +499,25 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text("AFTER", style: GoogleFonts.bebasNeue(fontSize: 14, letterSpacing: 5, color: Colors.white24)),
-            // --- MODIFICADO: ACCESO OCULTO POR LONG PRESS ---
-            GestureDetector(
-              onLongPress: _mostrarLoginAdmin,
-              child: Text("BURGERS", style: GoogleFonts.bebasNeue(fontSize: 32, fontWeight: FontWeight.bold, color: accent)),
+          // UNIFICADO: TODO EL TITULO ABRE LA COCINA
+          GestureDetector(
+            onLongPress: _mostrarLoginAdmin,
+            behavior: HitTestBehavior.opaque,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("AFTER", style: GoogleFonts.bebasNeue(fontSize: 14, letterSpacing: 5, color: Colors.white24)),
+                Text("BURGERS", style: GoogleFonts.bebasNeue(fontSize: 32, fontWeight: FontWeight.bold, color: accent)),
+              ],
             ),
-          ]),
+          ),
+          // RANGO: ESTE CONTROLA EL HORARIO
           GestureDetector(
             onLongPress: () {
               setState(() => ignoreTimeRestriction = !ignoreTimeRestriction);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Restricción horaria: ${ignoreTimeRestriction ? 'OFF' : 'ON'}")));
+              ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Restricción horaria: ${ignoreTimeRestriction ? 'OFF' : 'ON'}"))
+              );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -836,7 +842,7 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
   }
 }
 
-// --- PANTALLA DE COCINA COMPLETA ---
+// --- PANTALLA DE COCINA ---
 class KitchenPanel extends StatefulWidget {
   const KitchenPanel({super.key});
   @override
