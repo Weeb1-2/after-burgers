@@ -95,8 +95,15 @@ CREATE TABLE productos (
   ingredientes JSONB DEFAULT '[]',
   categoria TEXT DEFAULT 'burgers',
   image_path TEXT,
+  orden INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+```
+
+> **Orden del menú (opcional):** si querés controlar manualmente el orden en el que aparecen las hamburguesas, agregá la columna `orden` (si tu tabla ya existe):
+```sql
+alter table public.productos add column if not exists orden integer;
+create index if not exists productos_orden_idx on public.productos (orden);
 ```
 
 **Tabla `pedidos`:**

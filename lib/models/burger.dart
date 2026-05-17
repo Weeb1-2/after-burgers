@@ -7,6 +7,7 @@ class Burger {
   final List<String> ingredientes;
   final String categoria;
   final DateTime? createdAt;
+  final int? orden;
 
   Burger({
     this.id = '',
@@ -17,6 +18,7 @@ class Burger {
     required this.ingredientes,
     this.categoria = 'burgers',
     this.createdAt,
+    this.orden,
   });
 
   // Factory para crear desde JSON (Supabase)
@@ -26,6 +28,11 @@ class Burger {
         ? rawIngredientes.map((e) => e.toString()).toList()
         : <String>[];
 
+    final rawOrden = json['orden'];
+    final orden = rawOrden is int
+        ? rawOrden
+        : int.tryParse(rawOrden?.toString() ?? '');
+
     return Burger(
       id: json['id']?.toString() ?? '',
       nombre: json['nombre']?.toString() ?? 'Sin nombre',
@@ -34,9 +41,10 @@ class Burger {
       descripcion: json['descripcion']?.toString() ?? '',
       ingredientes: ingredientes,
       categoria: json['categoria'] ?? 'burgers',
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at']) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
           : null,
+      orden: orden,
     );
   }
 
@@ -50,6 +58,7 @@ class Burger {
       'descripcion': descripcion,
       'ingredientes': ingredientes,
       'categoria': categoria,
+      if (orden != null) 'orden': orden,
     };
   }
 
@@ -62,6 +71,7 @@ class Burger {
     String? descripcion,
     List<String>? ingredientes,
     String? categoria,
+    int? orden,
   }) {
     return Burger(
       id: id ?? this.id,
@@ -71,6 +81,7 @@ class Burger {
       descripcion: descripcion ?? this.descripcion,
       ingredientes: ingredientes ?? this.ingredientes,
       categoria: categoria ?? this.categoria,
+      orden: orden ?? this.orden,
     );
   }
 }

@@ -163,9 +163,21 @@ class _MainMenuEvoState extends State<MainMenuEvo>
 
       final ordenada = List<Burger>.from(listaCargada)
         ..sort((a, b) {
-          final ao = _esOferta(a);
-          final bo = _esOferta(b);
-          if (ao != bo) return ao ? -1 : 1; // ofertas primero
+          // Si existe "orden" lo respetamos (custom order desde admin).
+          final aOrden = a.orden;
+          final bOrden = b.orden;
+          if (aOrden != null || bOrden != null) {
+            if (aOrden == null) return 1;
+            if (bOrden == null) return -1;
+            final cmpOrden = aOrden.compareTo(bOrden);
+            if (cmpOrden != 0) return cmpOrden;
+          }
+
+          final aEsOferta = _esOferta(a);
+          final bEsOferta = _esOferta(b);
+          if (aEsOferta != bEsOferta) {
+            return aEsOferta ? -1 : 1; // ofertas primero
+          }
 
           final ac = a.createdAt;
           final bc = b.createdAt;

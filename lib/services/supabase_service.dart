@@ -87,6 +87,29 @@ class SupabaseService {
     }
   }
 
+  /// Actualiza el campo `orden` de los productos para controlar el orden
+  /// de aparición en el menú.
+  ///
+  /// Requiere que exista la columna `orden` (integer) en la tabla `productos`.
+  Future<void> updateOrdenProductos(List<Burger> productosOrdenados) async {
+    try {
+      // Hacemos updates individuales para soportar uuid o id numérico.
+      await Future.wait([
+        for (int i = 0; i < productosOrdenados.length; i++)
+          client
+              .from('productos')
+              .update({'orden': i + 1})
+              .eq(
+                'id',
+                int.tryParse(productosOrdenados[i].id) ??
+                    productosOrdenados[i].id,
+              ),
+      ]);
+    } catch (e) {
+      throw Exception('Error actualizando orden: $e');
+    }
+  }
+
   // ==================== PROMOCIONES ====================
 
   Future<List<Promo>> _getPromosDesdeProductos() async {

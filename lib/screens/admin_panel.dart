@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import '../config/constants.dart';
 import '../models/burger.dart';
+import '../screens/products_order_panel.dart';
 import '../services/supabase_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/product_image.dart';
@@ -35,6 +36,13 @@ class _AdminPanelState extends State<AdminPanel> {
 
     try {
       final productos = await _supabaseService.getProductos();
+      productos.sort((a, b) {
+        final ao = a.orden ?? 1 << 30;
+        final bo = b.orden ?? 1 << 30;
+        final cmp = ao.compareTo(bo);
+        if (cmp != 0) return cmp;
+        return a.nombre.toLowerCase().compareTo(b.nombre.toLowerCase());
+      });
       setState(() {
         _productos = productos;
         _cargando = false;
@@ -60,8 +68,10 @@ class _AdminPanelState extends State<AdminPanel> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppConstants.darkSurface,
-        title: const Text('¿Eliminar producto?',
-            style: TextStyle(color: Colors.white)),
+        title: const Text(
+          '¿Eliminar producto?',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Text(
           '¿Estás seguro de que deseas eliminar "${burger.nombre}"?',
           style: const TextStyle(color: Colors.white70),
@@ -69,12 +79,18 @@ class _AdminPanelState extends State<AdminPanel> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('CANCELAR', style: TextStyle(color: Colors.white24)),
+            child: const Text(
+              'CANCELAR',
+              style: TextStyle(color: Colors.white24),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('ELIMINAR', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'ELIMINAR',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -83,14 +99,14 @@ class _AdminPanelState extends State<AdminPanel> {
     if (confirm == true && mounted) {
       try {
         // Si la imagen es de Supabase, eliminarla del storage
-        if (burger.imagePath.startsWith('http') && 
+        if (burger.imagePath.startsWith('http') &&
             burger.imagePath.contains('supabase')) {
           await _storageService.deleteImageFromStorage(burger.imagePath);
         }
-        
+
         await _supabaseService.deleteProducto(burger.id);
         await _cargarProductos();
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -116,10 +132,8 @@ class _AdminPanelState extends State<AdminPanel> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductEditor(
-          burger: burger,
-          onSuccess: _cargarProductos,
-        ),
+        builder: (context) =>
+            ProductEditor(burger: burger, onSuccess: _cargarProductos),
       ),
     );
   }
@@ -129,11 +143,30 @@ class _AdminPanelState extends State<AdminPanel> {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: Text('ADMINISTRAR PRODUCTOS',
-            style: GoogleFonts.bebasNeue(letterSpacing: 2)),
+        title: Text(
+          'ADMINISTRAR PRODUCTOS',
+          style: GoogleFonts.bebasNeue(letterSpacing: 2),
+        ),
         backgroundColor: Colors.black,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: _productos.isEmpty
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductsOrderPanel(
+                          productos: _productos,
+                          onSaved: _cargarProductos,
+                        ),
+                      ),
+                    );
+                  },
+            tooltip: 'Ordenar menú',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _cargarProductos,
@@ -142,78 +175,96 @@ class _AdminPanelState extends State<AdminPanel> {
         ],
       ),
       body: _cargando
-          ? const Center(child: CircularProgressIndicator(color: AppConstants.primaryColor))
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: AppConstants.primaryColor,
+              ),
+            )
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, 
-                          size: 64, color: Colors.redAccent),
-                      const SizedBox(height: 16),
-                      Text('Error: $_error',
-                          style: const TextStyle(color: Colors.white70),
-                          textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _cargarProductos,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('REINTENTAR'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor,
-                        ),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.redAccent,
                   ),
-                )
-              : _productos.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.restaurant_menu,
-                              size: 64, color: Colors.white24),
-                          const SizedBox(height: 16),
-                          const Text('NO HAY PRODUCTOS',
-                              style: TextStyle(
-                                  color: Colors.white24,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          const Text(
-                              'Comienza agregando tu primer producto',
-                              style: TextStyle(color: Colors.white24)),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: () => _abrirEditorProducto(),
-                            icon: const Icon(Icons.add),
-                            label: const Text('AGREGAR PRODUCTO'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppConstants.primaryColor,
-                              minimumSize: const Size(200, 50),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _cargarProductos,
-                      color: AppConstants.primaryColor,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _productos.length,
-                        itemBuilder: (context, index) {
-                          final burger = _productos[index];
-                          return _buildProductoCard(burger);
-                        },
-                      ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: $_error',
+                    style: const TextStyle(color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: _cargarProductos,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('REINTENTAR'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppConstants.primaryColor,
                     ),
+                  ),
+                ],
+              ),
+            )
+          : _productos.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.restaurant_menu,
+                    size: 64,
+                    color: Colors.white24,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'NO HAY PRODUCTOS',
+                    style: TextStyle(
+                      color: Colors.white24,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Comienza agregando tu primer producto',
+                    style: TextStyle(color: Colors.white24),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => _abrirEditorProducto(),
+                    icon: const Icon(Icons.add),
+                    label: const Text('AGREGAR PRODUCTO'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppConstants.primaryColor,
+                      minimumSize: const Size(200, 50),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _cargarProductos,
+              color: AppConstants.primaryColor,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _productos.length,
+                itemBuilder: (context, index) {
+                  final burger = _productos[index];
+                  return _buildProductoCard(burger);
+                },
+              ),
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _abrirEditorProducto(),
         backgroundColor: AppConstants.primaryColor,
         icon: const Icon(Icons.add),
-        label: const Text('NUEVO',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        label: const Text(
+          'NUEVO',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -304,11 +355,7 @@ class ProductEditor extends StatefulWidget {
   final Burger? burger;
   final VoidCallback? onSuccess;
 
-  const ProductEditor({
-    super.key,
-    this.burger,
-    this.onSuccess,
-  });
+  const ProductEditor({super.key, this.burger, this.onSuccess});
 
   @override
   State<ProductEditor> createState() => _ProductEditorState();
@@ -402,7 +449,9 @@ class _ProductEditorState extends State<ProductEditor> {
     final t = raw.trim();
     if (t.isEmpty) return '';
     // Mantener un estilo consistente: "Tomate", "Salsa de la casa", etc.
-    return t.length == 1 ? t.toUpperCase() : '${t[0].toUpperCase()}${t.substring(1)}';
+    return t.length == 1
+        ? t.toUpperCase()
+        : '${t[0].toUpperCase()}${t.substring(1)}';
   }
 
   bool _contieneIngrediente(List<String> lista, String ingrediente) {
@@ -430,19 +479,27 @@ class _ProductEditorState extends State<ProductEditor> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppConstants.darkSurface,
-        title: const Text('Seleccionar imagen',
-            style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Seleccionar imagen',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library, color: Colors.white),
-              title: const Text('Galería', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Galería',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context, 1),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt, color: Colors.white),
-              title: const Text('Cámara', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Cámara',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context, 2),
             ),
           ],
@@ -459,10 +516,10 @@ class _ProductEditorState extends State<ProductEditor> {
 
       if (image != null && mounted) {
         setState(() => _guardando = true);
-        
+
         // Subir imagen a Supabase Storage
         final imageUrl = await _storageService.uploadImageToStorage(image);
-        
+
         setState(() {
           _imagenUrl = imageUrl;
           _guardando = false;
@@ -532,9 +589,11 @@ class _ProductEditorState extends State<ProductEditor> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_esEdicion
-                ? 'Producto actualizado correctamente'
-                : 'Producto creado correctamente'),
+            content: Text(
+              _esEdicion
+                  ? 'Producto actualizado correctamente'
+                  : 'Producto creado correctamente',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -570,7 +629,11 @@ class _ProductEditorState extends State<ProductEditor> {
         elevation: 0,
       ),
       body: _guardando
-          ? const Center(child: CircularProgressIndicator(color: AppConstants.primaryColor))
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: AppConstants.primaryColor,
+              ),
+            )
           : Form(
               key: _formKey,
               child: ListView(
@@ -601,8 +664,11 @@ class _ProductEditorState extends State<ProductEditor> {
                           : Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.add_photo_alternate,
-                                    size: 64, color: Colors.white24),
+                                Icon(
+                                  Icons.add_photo_alternate,
+                                  size: 64,
+                                  color: Colors.white24,
+                                ),
                                 const SizedBox(height: 8),
                                 const Text(
                                   'Toca para agregar imagen',
@@ -642,7 +708,10 @@ class _ProductEditorState extends State<ProductEditor> {
                       labelText: 'Precio (\$)',
                       labelStyle: TextStyle(color: Colors.white38),
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.attach_money, color: Colors.white38),
+                      prefixIcon: Icon(
+                        Icons.attach_money,
+                        color: Colors.white38,
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -666,17 +735,23 @@ class _ProductEditorState extends State<ProductEditor> {
                       labelStyle: TextStyle(color: Colors.white38),
                       border: OutlineInputBorder(),
                       alignLabelWithHint: true,
-                      prefixIcon: Icon(Icons.description, color: Colors.white38),
+                      prefixIcon: Icon(
+                        Icons.description,
+                        color: Colors.white38,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
 
                   // Categoría
-                  const Text('Categoría',
-                      style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Categoría',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _categoriaController,
@@ -687,7 +762,8 @@ class _ProductEditorState extends State<ProductEditor> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.category, color: Colors.white38),
                     ),
-                    onChanged: (v) => setState(() => _categoriaSeleccionada = v.trim()),
+                    onChanged: (v) =>
+                        setState(() => _categoriaSeleccionada = v.trim()),
                   ),
                   const SizedBox(height: 10),
                   Wrap(
@@ -701,7 +777,9 @@ class _ProductEditorState extends State<ProductEditor> {
                         backgroundColor: Colors.white10,
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.black : Colors.white70,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                         onSelected: (selected) {
                           setState(() => _categoriaSeleccionada = categoria);
@@ -713,11 +791,14 @@ class _ProductEditorState extends State<ProductEditor> {
                   const SizedBox(height: 24),
 
                   // Ingredientes
-                  const Text('Ingredientes',
-                      style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Ingredientes',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -742,7 +823,9 @@ class _ProductEditorState extends State<ProductEditor> {
                           onPressed: () => _agregarIngredientePorTeclado(
                             _ingredienteNuevoController.text,
                           ),
-                          style: ElevatedButton.styleFrom(backgroundColor: accent),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: accent,
+                          ),
                           child: const Icon(Icons.check, color: Colors.black),
                         ),
                       ),
@@ -761,7 +844,9 @@ class _ProductEditorState extends State<ProductEditor> {
                           deleteIconColor: Colors.redAccent,
                           onDeleted: () => setState(() {
                             _ingredientesSeleccionados.removeWhere(
-                              (e) => e.trim().toLowerCase() == ing.trim().toLowerCase(),
+                              (e) =>
+                                  e.trim().toLowerCase() ==
+                                  ing.trim().toLowerCase(),
                             );
                           }),
                         );
@@ -773,7 +858,9 @@ class _ProductEditorState extends State<ProductEditor> {
                     spacing: 8,
                     runSpacing: 8,
                     children: _ingredientesDisponibles.map((ingrediente) {
-                      final isSelected = _ingredientesSeleccionados.contains(ingrediente);
+                      final isSelected = _ingredientesSeleccionados.contains(
+                        ingrediente,
+                      );
                       return FilterChip(
                         label: Text(ingrediente),
                         selected: isSelected,
