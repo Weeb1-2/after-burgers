@@ -362,7 +362,7 @@ class _PromoEditorState extends State<PromoEditor> {
         descuentoPorcentaje: descuentoPct,
       );
 
-      await _repo.save(promo);
+      await _repo.save(promo, esEdicion: _esEdicion);
 
       if (mounted) {
         Navigator.pop(context);

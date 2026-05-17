@@ -40,14 +40,20 @@ class PromoRepository {
       ..sort((a, b) => b.fechaInicio.compareTo(a.fechaInicio));
   }
 
-  Future<void> save(Promo promo) async {
+  Future<void> save(Promo promo, {bool esEdicion = false}) async {
     try {
       Promo guardada;
-      final esNueva = int.tryParse(promo.id) == null;
-      if (esNueva) {
-        guardada = await _supabase.createPromocion(promo);
+      // Los IDs de promos pueden ser UUID (String), así que NO podemos inferir
+      // "es nueva" con int.tryParse(). El editor sabe si es edición o creación.
+      if (esEdicion) {
+        try {
+          guardada = await _supabase.updatePromocion(promo);
+        } catch (_) {
+          // Si por algún motivo no existía en remoto, la creamos.
+          guardada = await _supabase.createPromocion(promo);
+        }
       } else {
-        guardada = await _supabase.updatePromocion(promo);
+        guardada = await _supabase.createPromocion(promo);
       }
       final lista = await _loadLocal();
       final idx = lista.indexWhere((p) => p.id == promo.id);

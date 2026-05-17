@@ -33,8 +33,11 @@ class SupabaseService {
 
   Future<Burger?> getProductoById(String id) async {
     try {
-      final data =
-          await client.from('productos').select().eq('id', id).single();
+      final data = await client
+          .from('productos')
+          .select()
+          .eq('id', id)
+          .single();
       final burger = Burger.fromJson(data);
       if (Promo.esFilaPromo(burger.ingredientes)) return null;
       return burger;
@@ -153,14 +156,13 @@ class SupabaseService {
       return Promo.fromJson(data);
     }
 
-    final numericId = int.tryParse(promo.id);
-    if (numericId == null) {
-      throw Exception('ID de promo inválido para actualizar: ${promo.id}');
-    }
+    // Fallback: promos guardadas como "fila promo" dentro de la tabla `productos`.
+    // Dependiendo del schema, el id puede ser UUID (String) o numérico.
+    final dynamic idValue = int.tryParse(promo.id) ?? promo.id;
     final data = await client
         .from('productos')
         .update(promo.toProductoRow(includeId: false))
-        .eq('id', numericId)
+        .eq('id', idValue)
         .select()
         .single();
     return Promo.fromProductoRow(data);
@@ -171,11 +173,8 @@ class SupabaseService {
       await client.from('promociones').delete().eq('id', id);
       return;
     }
-    final numericId = int.tryParse(id);
-    if (numericId == null) {
-      throw Exception('ID de promo inválido para eliminar: $id');
-    }
-    await client.from('productos').delete().eq('id', numericId);
+    final dynamic idValue = int.tryParse(id) ?? id;
+    await client.from('productos').delete().eq('id', idValue);
   }
 
   // ==================== PEDIDOS ====================

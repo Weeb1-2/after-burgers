@@ -30,7 +30,9 @@ class BurgerCard extends StatelessWidget {
         color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
         border: Border.all(
-          color: isFavorita ? accent.withOpacity(0.3) : Colors.white.withOpacity(0.05),
+          color: isFavorita
+              ? accent.withOpacity(0.3)
+              : Colors.white.withOpacity(0.05),
           width: isFavorita ? 2 : 1,
         ),
       ),
@@ -38,68 +40,76 @@ class BurgerCard extends StatelessWidget {
         children: [
           Column(
             children: [
-              Expanded(
-                flex: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(30),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 3,
                     child: ProductImage(
                       imagePath: burger.imagePath,
                       width: double.infinity,
+                      height: double.infinity,
                     ),
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          burger.nombre,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              burger.nombre,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                        Text(
-                          PriceFormatter.formatFromString(burger.precio),
-                          style: TextStyle(
-                            color: accent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                          const SizedBox(width: 12),
+                          Text(
+                            PriceFormatter.formatFromString(burger.precio),
+                            style: TextStyle(
+                              color: accent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      const Text(
+                        AppConstants.includesFries,
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      AppConstants.includesFries,
-                      style: TextStyle(
-                        color: Colors.amber,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      burger.descripcion,
-                      style: const TextStyle(
-                        color: Colors.white38,
-                        fontSize: 12,
+                      const SizedBox(height: 8),
+                      Text(
+                        burger.descripcion,
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 25),
-                    _buildMainButton(accent),
-                    const SizedBox(height: 12),
-                    _buildExtraButtons(accent),
-                  ],
+                      const SizedBox(height: 25),
+                      _buildMainButton(accent),
+                      const SizedBox(height: 12),
+                      _buildExtraButtons(accent),
+                    ],
+                  ),
                 ),
-              )
+              ),
             ],
           ),
           if (isFavorita)
@@ -107,7 +117,10 @@ class BurgerCard extends StatelessWidget {
               top: 30,
               right: 30,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(12),
@@ -136,11 +149,7 @@ class BurgerCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppConstants.buttonBorderRadius),
           gradient: LinearGradient(
-            colors: [
-              accent,
-              Colors.white.withOpacity(0.7),
-              accent,
-            ],
+            colors: [accent, Colors.white.withOpacity(0.7), accent],
             stops: const [0.0, 0.5, 1.0],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

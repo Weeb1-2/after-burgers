@@ -26,7 +26,8 @@ class MainMenuEvo extends StatefulWidget {
   State<MainMenuEvo> createState() => _MainMenuEvoState();
 }
 
-class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin {
+class _MainMenuEvoState extends State<MainMenuEvo>
+    with TickerProviderStateMixin {
   // CONTROLADORES Y VARIABLES DE ESTADO
   late PageController _pageController;
   late AnimationController _shimmerController;
@@ -64,13 +65,13 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       });
 
     _shimmerController = AnimationController(
-        vsync: this,
-        duration: AppConstants.shimmerDuration
+      vsync: this,
+      duration: AppConstants.shimmerDuration,
     )..repeat();
 
     _cartBadgeController = AnimationController(
-        vsync: this,
-        duration: AppConstants.badgeAnimationDuration
+      vsync: this,
+      duration: AppConstants.badgeAnimationDuration,
     );
 
     _inicializarApp();
@@ -90,10 +91,7 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
   }
 
   Future<void> _refreshAll() async {
-    await Future.wait([
-      _obtenerProductosDesdeSupabase(),
-      _cargarPromociones(),
-    ]);
+    await Future.wait([_obtenerProductosDesdeSupabase(), _cargarPromociones()]);
   }
 
   CartTotals get _cartTotals =>
@@ -209,7 +207,7 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     final now = DateTime.now();
     final openingHour = EnvConfig.openingHour;
     final closingHour = EnvConfig.closingHour;
-    
+
     if (openingHour < closingHour) {
       // Ej: 9 a 17 (horario diurno)
       return now.hour >= openingHour && now.hour < closingHour;
@@ -229,24 +227,26 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       builder: (context) => AlertDialog(
         backgroundColor: AppConstants.darkSurface,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: AppConstants.primaryColor)
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppConstants.primaryColor),
         ),
-        title: Text("ACCESO RESTRINGIDO", 
-            style: GoogleFonts.bebasNeue(color: AppConstants.primaryColor)),
+        title: Text(
+          "ACCESO RESTRINGIDO",
+          style: GoogleFonts.bebasNeue(color: AppConstants.primaryColor),
+        ),
         content: TextField(
           controller: passController,
           obscureText: true,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
-              labelText: "Contraseña",
-              labelStyle: TextStyle(color: Colors.white38)
+            labelText: "Contraseña",
+            labelStyle: TextStyle(color: Colors.white38),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("CANCELAR")
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCELAR"),
           ),
           ElevatedButton(
             onPressed: () {
@@ -263,7 +263,7 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
               }
             },
             child: const Text("ENTRAR"),
-          )
+          ),
         ],
       ),
     );
@@ -275,40 +275,69 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       builder: (context) => AlertDialog(
         backgroundColor: AppConstants.darkSurface,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: AppConstants.primaryColor)
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppConstants.primaryColor),
         ),
-        title: Text("PANEL ADMIN", 
-            style: GoogleFonts.bebasNeue(color: AppConstants.primaryColor, fontSize: 20)),
+        title: Text(
+          "PANEL ADMIN",
+          style: GoogleFonts.bebasNeue(
+            color: AppConstants.primaryColor,
+            fontSize: 20,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.restaurant, color: AppConstants.primaryColor),
-              title: const Text("COCINA - PEDIDOS", style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => const KitchenPanel()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit_note, color: AppConstants.primaryColor),
-              title: const Text("ADMINISTRAR PRODUCTOS", style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => const AdminPanel()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.local_offer, color: AppConstants.primaryColor),
-              title: const Text("PROMOCIONES", style: TextStyle(color: Colors.white)),
+              leading: const Icon(
+                Icons.restaurant,
+                color: AppConstants.primaryColor,
+              ),
+              title: const Text(
+                "COCINA - PEDIDOS",
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PromosAdminPanel()),
+                  MaterialPageRoute(builder: (context) => const KitchenPanel()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.edit_note,
+                color: AppConstants.primaryColor,
+              ),
+              title: const Text(
+                "ADMINISTRAR PRODUCTOS",
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AdminPanel()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.local_offer,
+                color: AppConstants.primaryColor,
+              ),
+              title: const Text(
+                "PROMOCIONES",
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PromosAdminPanel(),
+                  ),
                 ).then((_) => _cargarPromociones());
               },
             ),
@@ -319,11 +348,12 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
   }
 
   // CARRITO Y PERSISTENCIA
-  void _agregarAlCarrito(Burger burger, {
-    int personas = 1, 
-    List<String> quitados = const [], 
-    List<String> adicionales = const [], 
-    int extraPrecio = 0
+  void _agregarAlCarrito(
+    Burger burger, {
+    int personas = 1,
+    List<String> quitados = const [],
+    List<String> adicionales = const [],
+    int extraPrecio = 0,
   }) {
     if (!estaAbierto) {
       _showClosedNotice();
@@ -334,13 +364,15 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     _cartBadgeController.forward(from: 0.0);
 
     setState(() {
-      carrito.add(CartItem(
+      carrito.add(
+        CartItem(
           burger: burger,
           personas: personas,
           ingredientesQuitados: List.from(quitados),
           adicionalesSumados: List.from(adicionales),
-          extraPrecio: extraPrecio
-      ));
+          extraPrecio: extraPrecio,
+        ),
+      );
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -377,39 +409,60 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Colors.white10),
         ),
-        title: Text("DATOS DE ENTREGA", 
-            style: GoogleFonts.bebasNeue(
-                color: AppConstants.primaryColor, 
-                fontSize: 24, 
-                letterSpacing: 2)),
+        title: Text(
+          "DATOS DE ENTREGA",
+          style: GoogleFonts.bebasNeue(
+            color: AppConstants.primaryColor,
+            fontSize: 24,
+            letterSpacing: 2,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: "Tu Nombre", labelStyle: TextStyle(color: Colors.white38)),
+              decoration: const InputDecoration(
+                labelText: "Tu Nombre",
+                labelStyle: TextStyle(color: Colors.white38),
+              ),
               style: const TextStyle(color: Colors.white),
             ),
             const SizedBox(height: 15),
             TextField(
               controller: addressController,
-              decoration: const InputDecoration(labelText: "Dirección Exacta", labelStyle: TextStyle(color: Colors.white38)),
+              decoration: const InputDecoration(
+                labelText: "Dirección Exacta",
+                labelStyle: TextStyle(color: Colors.white38),
+              ),
               style: const TextStyle(color: Colors.white),
             ),
           ],
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("CANCELAR", style: TextStyle(color: Colors.white24))
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "CANCELAR",
+              style: TextStyle(color: Colors.white24),
+            ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppConstants.primaryColor),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.primaryColor,
+            ),
             onPressed: () async {
-              if (nameController.text.trim().isNotEmpty && addressController.text.trim().isNotEmpty) {
+              if (nameController.text.trim().isNotEmpty &&
+                  addressController.text.trim().isNotEmpty) {
                 final prefs = await SharedPreferences.getInstance();
-                await prefs.setString('cliente_nombre', nameController.text.trim());
-                await prefs.setString('cliente_direccion', addressController.text.trim());
+                await prefs.setString(
+                  'cliente_nombre',
+                  nameController.text.trim(),
+                );
+                await prefs.setString(
+                  'cliente_direccion',
+                  addressController.text.trim(),
+                );
 
                 setState(() {
                   nombreGuardado = nameController.text.trim();
@@ -420,7 +473,13 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                 _procesarPedidoConAnimacion();
               }
             },
-            child: const Text("CONFIRMAR", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            child: const Text(
+              "CONFIRMAR",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -436,12 +495,16 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
         cliente: nombreGuardado,
         direccion: direccionGuardada,
         total: totals.total,
-        items: carrito.map((item) => {
-          'nombre': item.burger.nombre,
-          'cantidad': item.personas,
-          'sin': item.ingredientesQuitados,
-          'adicionales': item.adicionalesSumados
-        }).toList(),
+        items: carrito
+            .map(
+              (item) => {
+                'nombre': item.burger.nombre,
+                'cantidad': item.personas,
+                'sin': item.ingredientesQuitados,
+                'adicionales': item.adicionalesSumados,
+              },
+            )
+            .toList(),
         rango: rangoActual,
       );
     } catch (e) {
@@ -474,8 +537,11 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                 'assets/lottie/Ready For Delivery.json',
                 width: 250,
                 repeat: true,
-                errorBuilder: (context, error, stackTrace) => 
-                    const Icon(Icons.delivery_dining, size: 100, color: AppConstants.primaryColor),
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.delivery_dining,
+                  size: 100,
+                  color: AppConstants.primaryColor,
+                ),
               ),
               const SizedBox(height: 20),
               Text(
@@ -510,7 +576,8 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     mensaje += "👤 *CLIENTE:* $nombreGuardado\n";
     mensaje += "📍 *ENTREGA:* $direccionGuardada\n";
     mensaje += "🎖️ *NIVEL:* $rangoActual\n";
-    mensaje += "⏰ *HORA:* ${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')} hs\n";
+    mensaje +=
+        "⏰ *HORA:* ${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')} hs\n";
     if (promosActivas.isNotEmpty) {
       mensaje += "🎁 *PROMOS VIGENTES:*\n";
       for (final promo in promosActivas) {
@@ -555,8 +622,12 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
 
     mensaje += "\n💰 *TOTAL A PAGAR: ${PriceFormatter.format(totals.total)}*";
 
-    final Uri whatsappUri = Uri.parse("whatsapp://send?phone=$numero&text=${Uri.encodeComponent(mensaje)}");
-    final Uri webUri = Uri.parse("https://wa.me/$numero?text=${Uri.encodeComponent(mensaje)}");
+    final Uri whatsappUri = Uri.parse(
+      "whatsapp://send?phone=$numero&text=${Uri.encodeComponent(mensaje)}",
+    );
+    final Uri webUri = Uri.parse(
+      "https://wa.me/$numero?text=${Uri.encodeComponent(mensaje)}",
+    );
 
     try {
       if (await canLaunchUrl(whatsappUri)) {
@@ -620,10 +691,16 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                 childWhenDragging: Container(),
                 onDragEnd: (details) {
                   setState(() {
-                    double newY = MediaQuery.of(context).size.height - details.offset.dy - 60;
+                    double newY =
+                        MediaQuery.of(context).size.height -
+                        details.offset.dy -
+                        60;
                     _cartPosition = Offset(
-                        details.offset.dx,
-                        newY.clamp(20.0, MediaQuery.of(context).size.height - 150)
+                      details.offset.dx,
+                      newY.clamp(
+                        20.0,
+                        MediaQuery.of(context).size.height - 150,
+                      ),
                     );
                   });
                 },
@@ -645,10 +722,10 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
         child: Text(
           "LOCAL CERRADO - ABRIMOS DE 21:00 A 03:00",
           style: TextStyle(
-              color: Colors.redAccent,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2
+            color: Colors.redAccent,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
           ),
         ),
       ),
@@ -658,15 +735,18 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
   Widget _buildFAB(Color accent) {
     return ScaleTransition(
       scale: Tween(begin: 1.0, end: 1.1).animate(
-          CurvedAnimation(parent: _cartBadgeController, curve: Curves.elasticOut)
+        CurvedAnimation(parent: _cartBadgeController, curve: Curves.elasticOut),
       ),
       child: FloatingActionButton.extended(
         onPressed: () => _mostrarCarrito(accent),
         backgroundColor: accent,
         elevation: 10,
         label: Text(
-            "${carrito.length}",
-            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+          "${carrito.length}",
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
       ),
@@ -685,8 +765,22 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("AFTER", style: GoogleFonts.bebasNeue(fontSize: 14, letterSpacing: 5, color: Colors.white24)),
-                Text("BURGERS", style: GoogleFonts.bebasNeue(fontSize: 32, fontWeight: FontWeight.bold, color: accent)),
+                Text(
+                  "AFTER",
+                  style: GoogleFonts.bebasNeue(
+                    fontSize: 14,
+                    letterSpacing: 5,
+                    color: Colors.white24,
+                  ),
+                ),
+                Text(
+                  "BURGERS",
+                  style: GoogleFonts.bebasNeue(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: accent,
+                  ),
+                ),
               ],
             ),
           ),
@@ -694,18 +788,29 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
             onLongPress: () {
               setState(() => ignoreTimeRestriction = !ignoreTimeRestriction);
               ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Restricción horaria: ${ignoreTimeRestriction ? 'OFF' : 'ON'}"))
+                SnackBar(
+                  content: Text(
+                    "Restricción horaria: ${ignoreTimeRestriction ? 'OFF' : 'ON'}",
+                  ),
+                ),
               );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: Text(
-                  rangoActual,
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white70)
+                rangoActual,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -718,7 +823,9 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       context: context,
       backgroundColor: AppConstants.darkSurface,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => SafeArea(
           child: Container(
@@ -726,27 +833,43 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
             height: MediaQuery.of(context).size.height * 0.75,
             child: Column(
               children: [
-                Text("RESUMEN DE PEDIDO", style: GoogleFonts.bebasNeue(fontSize: 24, letterSpacing: 2)),
+                Text(
+                  "RESUMEN DE PEDIDO",
+                  style: GoogleFonts.bebasNeue(fontSize: 24, letterSpacing: 2),
+                ),
                 const Divider(color: Colors.white10, height: 40),
                 Expanded(
                   child: ListView.builder(
                     itemCount: carrito.length,
                     itemBuilder: (context, i) => ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(carrito[i].burger.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(
+                        carrito[i].burger.nombre,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       subtitle: Text(
-                          carrito[i].resumen,
-                          style: const TextStyle(color: Colors.white38, fontSize: 12)
+                        carrito[i].resumen,
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 12,
+                        ),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                              PriceFormatter.format(carrito[i].totalPrice),
-                              style: TextStyle(color: accent, fontWeight: FontWeight.bold)
+                            PriceFormatter.format(carrito[i].totalPrice),
+                            style: TextStyle(
+                              color: accent,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close, color: Colors.redAccent, size: 18),
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.redAccent,
+                              size: 18,
+                            ),
                             onPressed: () {
                               setModalState(() => carrito.removeAt(i));
                               setState(() {});
@@ -763,7 +886,10 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('SUBTOTAL', style: TextStyle(color: Colors.white38, fontSize: 12)),
+                      const Text(
+                        'SUBTOTAL',
+                        style: TextStyle(color: Colors.white38, fontSize: 12),
+                      ),
                       Text(
                         PriceFormatter.format(totals.subtotal),
                         style: const TextStyle(color: Colors.white54),
@@ -776,7 +902,10 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Text(
                         line,
-                        style: const TextStyle(color: Colors.greenAccent, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.greenAccent,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -787,7 +916,10 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           note,
-                          style: const TextStyle(color: Colors.amber, fontSize: 11),
+                          style: const TextStyle(
+                            color: Colors.amber,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ),
@@ -800,21 +932,28 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        totals.discount > 0 ? 'TOTAL CON PROMOS' : 'TOTAL ESTIMADO',
+                        totals.discount > 0
+                            ? 'TOTAL CON PROMOS'
+                            : 'TOTAL ESTIMADO',
                         style: const TextStyle(color: Colors.white54),
                       ),
                       Text(
-                          PriceFormatter.format(totals.total),
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)
+                        PriceFormatter.format(totals.total),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: accent,
-                      minimumSize: const Size(double.infinity, 65),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))
+                    backgroundColor: accent,
+                    minimumSize: const Size(double.infinity, 65),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                   onPressed: () {
                     if (!estaAbierto) {
@@ -825,7 +964,14 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                       _mostrarFormularioDatos();
                     }
                   },
-                  child: const Text("FINALIZAR PEDIDO", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text(
+                    "FINALIZAR PEDIDO",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -841,67 +987,118 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-          color: AppConstants.cardColor,
-          borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
-          border: Border.all(
-              color: isFavorita ? accent.withOpacity(0.3) : Colors.white.withOpacity(0.05),
-              width: isFavorita ? 2 : 1
-          )
+        color: AppConstants.cardColor,
+        borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+        border: Border.all(
+          color: isFavorita
+              ? accent.withOpacity(0.3)
+              : Colors.white.withOpacity(0.05),
+          width: isFavorita ? 2 : 1,
+        ),
       ),
       child: Stack(
         children: [
           Column(
             children: [
-              Expanded(
-                  flex: 4,
-                  child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: ProductImage(
-                            imagePath: burger.imagePath,
-                            accentColor: accent,
-                            width: double.infinity,
-                          )
-                      )
-                  )
-              ),
+              // La altura disponible cambia cuando hay promos arriba.
+              // Para que las fotos no se "rompan" en pantallas chicas, fijamos
+              // un ratio estable para la imagen y dejamos el resto scrolleable.
               Padding(
-                padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(burger.nombre, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                        Text(
-                          PriceFormatter.formatFromString(burger.precio),
-                          style: TextStyle(color: accent, fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                      ],
+                padding: const EdgeInsets.all(20),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 3,
+                    child: ProductImage(
+                      imagePath: burger.imagePath,
+                      accentColor: accent,
+                      width: double.infinity,
+                      height: double.infinity,
                     ),
-                    const SizedBox(height: 5),
-                    const Text(AppConstants.includesFries, style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text(burger.descripcion, style: const TextStyle(color: Colors.white38, fontSize: 12)),
-                    const SizedBox(height: 25),
-                    _buildMainButton(burger, accent),
-                    const SizedBox(height: 12),
-                    _buildExtraButtons(burger, accent),
-                  ],
+                  ),
                 ),
-              )
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              burger.nombre,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            PriceFormatter.formatFromString(burger.precio),
+                            style: TextStyle(
+                              color: accent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      const Text(
+                        AppConstants.includesFries,
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        burger.descripcion,
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 25),
+                      _buildMainButton(burger, accent),
+                      const SizedBox(height: 12),
+                      _buildExtraButtons(burger, accent),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
-          if (isFavorita) Positioned(
-            top: 30, right: 30,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(12)),
-              child: const Text("TU FAVORITA ⭐", style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
+          if (isFavorita)
+            Positioned(
+              top: 30,
+              right: 30,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  "TU FAVORITA ⭐",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
-          )
         ],
       ),
     );
@@ -980,29 +1177,35 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       child: AnimatedBuilder(
         animation: _shimmerController,
         builder: (context, child) => Container(
-          height: 60, width: double.infinity,
+          height: 60,
+          width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppConstants.buttonBorderRadius),
-            color: closed ? Colors.white10 : null,
-            gradient: closed ? null : LinearGradient(
-              colors: [accent, Colors.white.withOpacity(0.7), accent],
-              stops: [
-                (_shimmerController.value - 0.2).clamp(0.0, 1.0),
-                _shimmerController.value,
-                (_shimmerController.value + 0.2).clamp(0.0, 1.0)
-              ],
-              begin: Alignment.topLeft, end: Alignment.bottomRight,
+            borderRadius: BorderRadius.circular(
+              AppConstants.buttonBorderRadius,
             ),
+            color: closed ? Colors.white10 : null,
+            gradient: closed
+                ? null
+                : LinearGradient(
+                    colors: [accent, Colors.white.withOpacity(0.7), accent],
+                    stops: [
+                      (_shimmerController.value - 0.2).clamp(0.0, 1.0),
+                      _shimmerController.value,
+                      (_shimmerController.value + 0.2).clamp(0.0, 1.0),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
           ),
           child: Center(
-              child: Text(
-                  closed ? "PEDIR A PARTIR DE LAS 21:00" : "AGREGAR AL CARRITO",
-                  style: TextStyle(
-                      color: closed ? Colors.white24 : Colors.black,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 11
-                  )
-              )
+            child: Text(
+              closed ? "PEDIR A PARTIR DE LAS 21:00" : "AGREGAR AL CARRITO",
+              style: TextStyle(
+                color: closed ? Colors.white24 : Colors.black,
+                fontWeight: FontWeight.w900,
+                fontSize: 11,
+              ),
+            ),
           ),
         ),
       ),
@@ -1016,18 +1219,27 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
           child: OutlinedButton(
             onPressed: () => _showGroupOrder(burger, accent),
             style: OutlinedButton.styleFrom(
-                side: BorderSide(color: accent.withOpacity(0.2)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                padding: const EdgeInsets.symmetric(vertical: 15)
+              side: BorderSide(color: accent.withOpacity(0.2)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 15),
             ),
-            child: const Text("PARA VARIOS", style: TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.bold)),
+            child: const Text(
+              "PARA VARIOS",
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.white70,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 10),
         IconButton(
-            onPressed: () => _showCustomization(burger, accent),
-            icon: Icon(Icons.tune, color: accent, size: 28)
-        )
+          onPressed: () => _showCustomization(burger, accent),
+          icon: Icon(Icons.tune, color: accent, size: 28),
+        ),
       ],
     );
   }
@@ -1042,7 +1254,9 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
       context: context,
       isScrollControlled: true,
       backgroundColor: AppConstants.darkSurface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => SafeArea(
           child: Padding(
@@ -1050,28 +1264,62 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("¿CUÁNTAS PERSONAS COMEN?", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                const SizedBox(height: 30),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  _counterBtn(Icons.remove, () => setModalState(() { if(cantidad > 1) cantidad--; })),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: Text("$cantidad", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: accent)),
+                const Text(
+                  "¿CUÁNTAS PERSONAS COMEN?",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
                   ),
-                  _counterBtn(Icons.add, () => setModalState(() { cantidad++; })),
-                ]),
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _counterBtn(
+                      Icons.remove,
+                      () => setModalState(() {
+                        if (cantidad > 1) cantidad--;
+                      }),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                      child: Text(
+                        "$cantidad",
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: accent,
+                        ),
+                      ),
+                    ),
+                    _counterBtn(
+                      Icons.add,
+                      () => setModalState(() {
+                        cantidad++;
+                      }),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 40),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: accent,
-                      minimumSize: const Size(double.infinity, 60),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                    backgroundColor: accent,
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                   ),
                   onPressed: () {
                     Navigator.pop(context);
                     _agregarAlCarrito(burger, personas: cantidad);
                   },
-                  child: const Text("CONFIRMAR GRUPO", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "CONFIRMAR GRUPO",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1086,8 +1334,8 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     child: Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          border: Border.all(color: Colors.white10),
-          borderRadius: BorderRadius.circular(10)
+        border: Border.all(color: Colors.white10),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(icon, color: Colors.white),
     ),
@@ -1103,13 +1351,17 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
     List<String> adicionalesLocal = [];
     int extraAcumulado = 0;
 
-    final opciones = burger.ingredientes.where((ing) => ing.toLowerCase() != "carne").toList();
+    final opciones = burger.ingredientes
+        .where((ing) => ing.toLowerCase() != "carne")
+        .toList();
 
     showModalBottomSheet(
       context: context,
       backgroundColor: AppConstants.darkSurface,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
       builder: (context) => StatefulBuilder(
         builder: (context, setMState) => SafeArea(
           child: Padding(
@@ -1117,37 +1369,62 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("PERSONALIZAR", style: GoogleFonts.bebasNeue(fontSize: 22)),
-                const Text("Quitar ingredientes:", style: TextStyle(color: Colors.white24, fontSize: 11)),
+                Text(
+                  "PERSONALIZAR",
+                  style: GoogleFonts.bebasNeue(fontSize: 22),
+                ),
+                const Text(
+                  "Quitar ingredientes:",
+                  style: TextStyle(color: Colors.white24, fontSize: 11),
+                ),
                 const SizedBox(height: 10),
                 Flexible(
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        ...opciones.map((ing) => CheckboxListTile(
-                          title: Text(ing, style: const TextStyle(fontSize: 14)),
-                          value: !quitadosLocal.contains(ing),
-                          activeColor: accent,
-                          onChanged: (val) => setMState(() {
-                            val! ? quitadosLocal.remove(ing) : quitadosLocal.add(ing);
-                          }),
-                        )),
+                        ...opciones.map(
+                          (ing) => CheckboxListTile(
+                            title: Text(
+                              ing,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            value: !quitadosLocal.contains(ing),
+                            activeColor: accent,
+                            onChanged: (val) => setMState(() {
+                              val!
+                                  ? quitadosLocal.remove(ing)
+                                  : quitadosLocal.add(ing);
+                            }),
+                          ),
+                        ),
                         const Divider(color: Colors.white10),
-                        const Text("AGREGAR EXTRAS:", style: TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
-                        ...adicionalesPrecios.entries.map((entry) => CheckboxListTile(
-                          title: Text("${entry.key} (+\$${entry.value})", style: const TextStyle(fontSize: 14)),
-                          value: adicionalesLocal.contains(entry.key),
-                          activeColor: Colors.amber,
-                          onChanged: (val) => setMState(() {
-                            if (val!) {
-                              adicionalesLocal.add(entry.key);
-                              extraAcumulado += entry.value;
-                            } else {
-                              adicionalesLocal.remove(entry.key);
-                              extraAcumulado -= entry.value;
-                            }
-                          }),
-                        )),
+                        const Text(
+                          "AGREGAR EXTRAS:",
+                          style: TextStyle(
+                            color: Colors.amber,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        ...adicionalesPrecios.entries.map(
+                          (entry) => CheckboxListTile(
+                            title: Text(
+                              "${entry.key} (+\$${entry.value})",
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            value: adicionalesLocal.contains(entry.key),
+                            activeColor: Colors.amber,
+                            onChanged: (val) => setMState(() {
+                              if (val!) {
+                                adicionalesLocal.add(entry.key);
+                                extraAcumulado += entry.value;
+                              } else {
+                                adicionalesLocal.remove(entry.key);
+                                extraAcumulado -= entry.value;
+                              }
+                            }),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1155,19 +1432,25 @@ class _MainMenuEvoState extends State<MainMenuEvo> with TickerProviderStateMixin
                 const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: accent,
-                      minimumSize: const Size(double.infinity, 55)
+                    backgroundColor: accent,
+                    minimumSize: const Size(double.infinity, 55),
                   ),
                   onPressed: () {
                     Navigator.pop(context);
                     _agregarAlCarrito(
-                        burger,
-                        quitados: quitadosLocal,
-                        adicionales: adicionalesLocal,
-                        extraPrecio: extraAcumulado
+                      burger,
+                      quitados: quitadosLocal,
+                      adicionales: adicionalesLocal,
+                      extraPrecio: extraAcumulado,
                     );
                   },
-                  child: const Text("GUARDAR Y AÑADIR", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "GUARDAR Y AÑADIR",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
