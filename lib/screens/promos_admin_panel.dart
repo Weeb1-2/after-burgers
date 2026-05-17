@@ -49,7 +49,10 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppConstants.darkSurface,
-        title: const Text('¿Eliminar promo?', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          '¿Eliminar promo?',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Text(
           'Se eliminará "${promo.titulo}"',
           style: const TextStyle(color: Colors.white70),
@@ -86,10 +89,7 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PromoEditor(
-          promo: promo,
-          onSuccess: _cargar,
-        ),
+        builder: (_) => PromoEditor(promo: promo, onSuccess: _cargar),
       ),
     );
   }
@@ -115,7 +115,10 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: Text('PROMOCIONES', style: GoogleFonts.bebasNeue(letterSpacing: 2)),
+        title: Text(
+          'PROMOCIONES',
+          style: GoogleFonts.bebasNeue(letterSpacing: 2),
+        ),
         backgroundColor: Colors.black,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _cargar),
@@ -126,108 +129,137 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
         backgroundColor: AppConstants.primaryColor,
         foregroundColor: Colors.black,
         icon: const Icon(Icons.add),
-        label: const Text('NUEVA PROMO', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: const Text(
+          'NUEVA PROMO',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: _cargando
-          ? const Center(child: CircularProgressIndicator(color: AppConstants.primaryColor))
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: AppConstants.primaryColor,
+              ),
+            )
           : _promos.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.local_offer_outlined, size: 64, color: Colors.white24),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'SIN PROMOCIONES',
-                        style: TextStyle(color: Colors.white24, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Creá ofertas 2x1, regalos, etc.',
-                        style: TextStyle(color: Colors.white24, fontSize: 12),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.local_offer_outlined,
+                    size: 64,
+                    color: Colors.white24,
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _cargar,
-                  color: AppConstants.primaryColor,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-                    itemCount: _promos.length,
-                    itemBuilder: (_, i) {
-                      final p = _promos[i];
-                      final estadoColor = _estadoColor(p);
-                      return Card(
-                        color: AppConstants.cardColor,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: p.estaVigente
-                                ? AppConstants.primaryColor.withOpacity(0.4)
-                                : Colors.white10,
-                          ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'SIN PROMOCIONES',
+                    style: TextStyle(
+                      color: Colors.white24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Creá ofertas 2x1, regalos, etc.',
+                    style: TextStyle(color: Colors.white24, fontSize: 12),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _cargar,
+              color: AppConstants.primaryColor,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+                itemCount: _promos.length,
+                itemBuilder: (_, i) {
+                  final p = _promos[i];
+                  final estadoColor = _estadoColor(p);
+                  return Card(
+                    color: AppConstants.cardColor,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: p.estaVigente
+                            ? AppConstants.primaryColor.withOpacity(0.4)
+                            : Colors.white10,
+                      ),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(14),
+                      leading: CircleAvatar(
+                        backgroundColor: estadoColor.withOpacity(0.15),
+                        child: Text(
+                          p.emoji,
+                          style: const TextStyle(fontSize: 22),
                         ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(14),
-                          leading: CircleAvatar(
-                            backgroundColor: estadoColor.withOpacity(0.15),
-                            child: Text(p.emoji, style: const TextStyle(fontSize: 22)),
-                          ),
-                          title: Text(
-                            p.titulo,
+                      ),
+                      title: Text(
+                        p.titulo,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(
+                            p.descripcion,
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              color: Colors.white54,
+                              fontSize: 12,
                             ),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(
-                                p.descripcion,
-                                style: const TextStyle(color: Colors.white54, fontSize: 12),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                p.vigenciaTexto,
-                                style: TextStyle(color: estadoColor, fontSize: 11),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _estadoTexto(p),
-                                style: TextStyle(
-                                  color: estadoColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 6),
+                          Text(
+                            p.vigenciaTexto,
+                            style: TextStyle(color: estadoColor, fontSize: 11),
                           ),
-                          trailing: PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_vert, color: Colors.white54),
-                            color: AppConstants.darkSurface,
-                            onSelected: (v) {
-                              if (v == 'edit') _abrirEditor(p);
-                              if (v == 'delete') _eliminar(p);
-                            },
-                            itemBuilder: (_) => [
-                              const PopupMenuItem(value: 'edit', child: Text('Editar')),
-                              const PopupMenuItem(
-                                value: 'delete',
-                                child: Text('Eliminar', style: TextStyle(color: Colors.redAccent)),
-                              ),
-                            ],
+                          const SizedBox(height: 4),
+                          Text(
+                            _estadoTexto(p),
+                            style: TextStyle(
+                              color: estadoColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              letterSpacing: 1,
+                            ),
                           ),
-                          onTap: () => _abrirEditor(p),
+                        ],
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: Colors.white54,
                         ),
-                      );
-                    },
-                  ),
-                ),
+                        color: AppConstants.darkSurface,
+                        onSelected: (v) {
+                          if (v == 'edit') _abrirEditor(p);
+                          if (v == 'delete') _eliminar(p);
+                        },
+                        itemBuilder: (_) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Editar'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              'Eliminar',
+                              style: TextStyle(color: Colors.redAccent),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => _abrirEditor(p),
+                    ),
+                  );
+                },
+              ),
+            ),
     );
   }
 }
@@ -269,8 +301,9 @@ class _PromoEditorState extends State<PromoEditor> {
       _descripcion.text = p.descripcion;
       _etiqueta.text = p.etiqueta;
       _productoObjetivo.text = p.productoObjetivo ?? '';
-      _descuento.text =
-          p.descuentoPorcentaje > 0 ? '${p.descuentoPorcentaje}' : '';
+      _descuento.text = p.descuentoPorcentaje > 0
+          ? '${p.descuentoPorcentaje}'
+          : '';
       _tipo = p.tipo;
       _activa = p.activa;
       _inicio = p.fechaInicio;
@@ -300,7 +333,9 @@ class _PromoEditorState extends State<PromoEditor> {
       lastDate: DateTime(2030),
       builder: (ctx, child) => Theme(
         data: ThemeData.dark().copyWith(
-          colorScheme: const ColorScheme.dark(primary: AppConstants.primaryColor),
+          colorScheme: const ColorScheme.dark(
+            primary: AppConstants.primaryColor,
+          ),
         ),
         child: child!,
       ),
@@ -312,14 +347,22 @@ class _PromoEditorState extends State<PromoEditor> {
       initialTime: TimeOfDay.fromDateTime(base),
       builder: (ctx, child) => Theme(
         data: ThemeData.dark().copyWith(
-          colorScheme: const ColorScheme.dark(primary: AppConstants.primaryColor),
+          colorScheme: const ColorScheme.dark(
+            primary: AppConstants.primaryColor,
+          ),
         ),
         child: child!,
       ),
     );
     if (hora == null) return;
 
-    final elegida = DateTime(fecha.year, fecha.month, fecha.day, hora.hour, hora.minute);
+    final elegida = DateTime(
+      fecha.year,
+      fecha.month,
+      fecha.day,
+      hora.hour,
+      hora.minute,
+    );
     setState(() {
       if (esInicio) {
         _inicio = elegida;
@@ -362,22 +405,20 @@ class _PromoEditorState extends State<PromoEditor> {
         descuentoPorcentaje: descuentoPct,
       );
 
-      await _repo.save(promo, esEdicion: _esEdicion);
+      final synced = await _repo.save(promo, esEdicion: _esEdicion);
 
       if (mounted) {
         Navigator.pop(context);
         widget.onSuccess?.call();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_esEdicion ? 'Promo actualizada' : 'Promo creada'),
-            backgroundColor: Colors.green,
+            content: Text(
+              synced
+                  ? (_esEdicion ? 'Promo actualizada' : 'Promo creada')
+                  : 'Promo guardada (sincronización pendiente)',
+            ),
+            backgroundColor: synced ? Colors.green : Colors.amber,
           ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -410,10 +451,14 @@ class _PromoEditorState extends State<PromoEditor> {
                     dropdownColor: AppConstants.darkSurface,
                     decoration: _inputDeco('Tipo de promo'),
                     items: Promo.tiposLabels.entries
-                        .map((e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text('${Promo.tiposEmojis[e.key]} ${e.value}'),
-                            ))
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.key,
+                            child: Text(
+                              '${Promo.tiposEmojis[e.key]} ${e.value}',
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) => setState(() => _tipo = v ?? 'otro'),
                   ),
@@ -422,8 +467,9 @@ class _PromoEditorState extends State<PromoEditor> {
                     controller: _titulo,
                     style: const TextStyle(color: Colors.white),
                     decoration: _inputDeco('Título (ej: 2x1 en clásicas)'),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Ingresá un título' : null,
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? 'Ingresá un título'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -433,14 +479,17 @@ class _PromoEditorState extends State<PromoEditor> {
                     decoration: _inputDeco(
                       'Descripción (ej: Con tu compra, papas con cheddar gratis)',
                     ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Ingresá la descripción' : null,
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? 'Ingresá la descripción'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _etiqueta,
                     style: const TextStyle(color: Colors.white),
-                    decoration: _inputDeco('Etiqueta en banner (ej: 2x1, GRATIS) — opcional'),
+                    decoration: _inputDeco(
+                      'Etiqueta en banner (ej: 2x1, GRATIS) — opcional',
+                    ),
                   ),
                   if (_tipo == '2x1') ...[
                     const SizedBox(height: 16),
@@ -458,7 +507,9 @@ class _PromoEditorState extends State<PromoEditor> {
                       controller: _descuento,
                       keyboardType: TextInputType.number,
                       style: const TextStyle(color: Colors.white),
-                      decoration: _inputDeco('Porcentaje de descuento (ej: 10)'),
+                      decoration: _inputDeco(
+                        'Porcentaje de descuento (ej: 10)',
+                      ),
                       validator: (v) {
                         if (_tipo != 'descuento') return null;
                         final n = int.tryParse(v?.trim() ?? '');
@@ -470,12 +521,19 @@ class _PromoEditorState extends State<PromoEditor> {
                     ),
                   ],
                   const SizedBox(height: 20),
-                  _fechaTile('Inicio', _inicio, () => _elegirFecha(esInicio: true)),
+                  _fechaTile(
+                    'Inicio',
+                    _inicio,
+                    () => _elegirFecha(esInicio: true),
+                  ),
                   const SizedBox(height: 10),
                   _fechaTile('Fin', _fin, () => _elegirFecha(esInicio: false)),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: const Text('Promo activa', style: TextStyle(color: Colors.white)),
+                    title: const Text(
+                      'Promo activa',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     subtitle: const Text(
                       'Desactivá para pausar sin borrar',
                       style: TextStyle(color: Colors.white38, fontSize: 12),
@@ -525,13 +583,22 @@ class _PromoEditorState extends State<PromoEditor> {
       onTap: onTap,
       tileColor: AppConstants.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      title: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      title: Text(
+        label,
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
+      ),
       subtitle: Text(
         '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}/${fecha.year} '
         '${fecha.hour.toString().padLeft(2, '0')}:${fecha.minute.toString().padLeft(2, '0')}',
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      trailing: const Icon(Icons.calendar_month, color: AppConstants.primaryColor),
+      trailing: const Icon(
+        Icons.calendar_month,
+        color: AppConstants.primaryColor,
+      ),
     );
   }
 }

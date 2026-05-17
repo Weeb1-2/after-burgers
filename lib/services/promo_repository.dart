@@ -40,7 +40,9 @@ class PromoRepository {
       ..sort((a, b) => b.fechaInicio.compareTo(a.fechaInicio));
   }
 
-  Future<void> save(Promo promo, {bool esEdicion = false}) async {
+  /// Guarda la promo y devuelve si se pudo sincronizar con Supabase.
+  /// Si falla Supabase, se guarda igual localmente (SharedPreferences).
+  Future<bool> save(Promo promo, {bool esEdicion = false}) async {
     try {
       Promo guardada;
       // Los IDs de promos pueden ser UUID (String), así que NO podemos inferir
@@ -63,6 +65,7 @@ class PromoRepository {
         lista.add(guardada);
       }
       await _saveLocal(lista);
+      return true;
     } catch (e) {
       debugPrint('Guardando promo solo local: $e');
       final lista = await _loadLocal();
@@ -73,7 +76,7 @@ class PromoRepository {
         lista.add(promo);
       }
       await _saveLocal(lista);
-      rethrow;
+      return false;
     }
   }
 
