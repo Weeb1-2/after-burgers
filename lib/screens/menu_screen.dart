@@ -34,6 +34,7 @@ class _MainMenuEvoState extends State<MainMenuEvo>
   late AnimationController _cartBadgeController;
 
   double _currentPage = 0.0;
+  double _viewportFraction = 0.85;
   List<CartItem> carrito = [];
   int pedidosRealizados = 0;
   String favoritaName = "";
@@ -57,7 +58,7 @@ class _MainMenuEvoState extends State<MainMenuEvo>
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.85)
+    _pageController = PageController(viewportFraction: _viewportFraction)
       ..addListener(() {
         setState(() {
           _currentPage = _pageController.page!;
@@ -75,6 +76,43 @@ class _MainMenuEvoState extends State<MainMenuEvo>
     );
 
     _inicializarApp();
+  }
+
+  double _viewportFractionForWidth(double width) {
+    // En desktop el PageView se vuelve gigante, así que lo achicamos.
+    if (width >= 1100) return 0.36;
+    if (width >= 900) return 0.42;
+    if (width >= 600) return 0.70;
+    return 0.85;
+  }
+
+  void _recreatePageControllerIfNeeded() {
+    final desired = _viewportFractionForWidth(
+      MediaQuery.of(context).size.width,
+    );
+    if ((desired - _viewportFraction).abs() <= 0.01) return;
+
+    final old = _pageController;
+    final current = old.hasClients ? (old.page ?? _currentPage) : _currentPage;
+
+    _viewportFraction = desired;
+    _pageController =
+        PageController(
+          viewportFraction: _viewportFraction,
+          initialPage: current.round(),
+        )..addListener(() {
+          setState(() {
+            _currentPage = _pageController.page!;
+          });
+        });
+
+    old.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _recreatePageControllerIfNeeded();
   }
 
   @override
@@ -984,122 +1022,127 @@ class _MainMenuEvoState extends State<MainMenuEvo>
   Widget _buildBurgerCard(Burger burger, Color accent) {
     bool isFavorita = burger.nombre == favoritaName;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: AppConstants.cardColor,
-        borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
-        border: Border.all(
-          color: isFavorita
-              ? accent.withOpacity(0.3)
-              : Colors.white.withOpacity(0.05),
-          width: isFavorita ? 2 : 1,
-        ),
-      ),
-      child: Stack(
-        children: [
-          Column(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: AppConstants.cardColor,
+            borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+            border: Border.all(
+              color: isFavorita
+                  ? accent.withOpacity(0.3)
+                  : Colors.white.withOpacity(0.05),
+              width: isFavorita ? 2 : 1,
+            ),
+          ),
+          child: Stack(
             children: [
-              // La altura disponible cambia cuando hay promos arriba.
-              // Para que las fotos no se "rompan" en pantallas chicas, fijamos
-              // un ratio estable para la imagen y dejamos el resto scrolleable.
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: AspectRatio(
-                    aspectRatio: 4 / 3,
-                    child: ProductImage(
-                      imagePath: burger.imagePath,
-                      accentColor: accent,
-                      width: double.infinity,
-                      height: double.infinity,
+              Column(
+                children: [
+                  // La altura disponible cambia cuando hay promos arriba.
+                  // Para que las fotos no se "rompan" en pantallas chicas, fijamos
+                  // un ratio estable para la imagen y dejamos el resto scrolleable.
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: AspectRatio(
+                        aspectRatio: 4 / 3,
+                        child: ProductImage(
+                          imagePath: burger.imagePath,
+                          accentColor: accent,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  burger.nombre,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                PriceFormatter.formatFromString(burger.precio),
+                                style: TextStyle(
+                                  color: accent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            AppConstants.includesFries,
+                            style: TextStyle(
+                              color: Colors.amber,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            burger.descripcion,
+                            style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 25),
+                          _buildMainButton(burger, accent),
+                          const SizedBox(height: 12),
+                          _buildExtraButtons(burger, accent),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (isFavorita)
+                Positioned(
+                  top: 30,
+                  right: 30,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      "TU FAVORITA ⭐",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              burger.nombre,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            PriceFormatter.formatFromString(burger.precio),
-                            style: TextStyle(
-                              color: accent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        AppConstants.includesFries,
-                        style: TextStyle(
-                          color: Colors.amber,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        burger.descripcion,
-                        style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      _buildMainButton(burger, accent),
-                      const SizedBox(height: 12),
-                      _buildExtraButtons(burger, accent),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
-          if (isFavorita)
-            Positioned(
-              top: 30,
-              right: 30,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: accent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  "TU FAVORITA ⭐",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
