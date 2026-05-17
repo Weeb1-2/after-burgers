@@ -48,9 +48,11 @@ class SupabaseService {
 
   Future<Burger> createProducto(Burger burger) async {
     try {
+      // En inserción no enviamos id: lo genera la DB (UUID/autoincrement).
+      final payload = Map<String, dynamic>.from(burger.toJson())..remove('id');
       final data = await client
           .from('productos')
-          .insert(burger.toJson())
+          .insert(payload)
           .select()
           .single();
       return Burger.fromJson(data);
@@ -61,10 +63,13 @@ class SupabaseService {
 
   Future<Burger> updateProducto(Burger burger) async {
     try {
+      // En update NO debemos mandar el id en el payload (y soportamos uuid/int).
+      final payload = Map<String, dynamic>.from(burger.toJson())..remove('id');
+      final dynamic idValue = int.tryParse(burger.id) ?? burger.id;
       final data = await client
           .from('productos')
-          .update(burger.toJson())
-          .eq('id', burger.id)
+          .update(payload)
+          .eq('id', idValue)
           .select()
           .single();
       return Burger.fromJson(data);
@@ -75,7 +80,8 @@ class SupabaseService {
 
   Future<void> deleteProducto(String id) async {
     try {
-      await client.from('productos').delete().eq('id', id);
+      final dynamic idValue = int.tryParse(id) ?? id;
+      await client.from('productos').delete().eq('id', idValue);
     } catch (e) {
       throw Exception('Error eliminando producto: $e');
     }
