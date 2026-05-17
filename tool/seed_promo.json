@@ -1,0 +1,14 @@
+{
+  "nombre": "Papas con cheddar GRATIS",
+  "descripcion": "Con la compra de cualquier burger te llevás papas con cheddar",
+  "precio": 0,
+  "image_path": "GRATIS",
+  "ingredientes": [
+    "promo_row:true",
+    "promo_tipo:regalo",
+    "promo_activa:true",
+    "promo_inicio:2026-05-17T00:00:00.000Z",
+    "promo_fin:2026-05-31T23:59:59.000Z",
+    "promo_etiqueta:GRATIS"
+  ]
+}

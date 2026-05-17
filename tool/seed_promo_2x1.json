@@ -1,0 +1,14 @@
+{
+  "nombre": "2x1 en Clásica",
+  "descripcion": "Llevás dos burgers clásicas al precio de una. Válido de lun a jue.",
+  "precio": 0,
+  "image_path": "2x1",
+  "ingredientes": [
+    "promo_row:true",
+    "promo_tipo:2x1",
+    "promo_activa:true",
+    "promo_inicio:2026-05-17T00:00:00.000Z",
+    "promo_fin:2026-05-31T23:59:59.000Z",
+    "promo_etiqueta:2x1"
+  ]
+}
