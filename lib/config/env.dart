@@ -11,6 +11,12 @@ class EnvConfig {
   
   // Admin Configuration
   static String get adminPassword => dotenv.env['ADMIN_PASSWORD'] ?? '31647601';
+
+  // Promociones
+  /// Si es false, NO se mostrarán promociones en el menú (aunque existan en Supabase).
+  /// Valores aceptados: "true/false", "1/0", "yes/no" (case-insensitive).
+  static bool get promosEnabled =>
+      _parseBool(dotenv.env['PROMOS_ENABLED'], fallback: true);
   
   // WhatsApp Configuration
   static String get whatsappNumber => dotenv.env['WHATSAPP_NUMBER'] ?? '5493541612565';
@@ -48,5 +54,14 @@ class EnvConfig {
       return imagePath; // Ya es una URL completa
     }
     return '$supabaseUrl/storage/v1/object/public/$storageBucket/$imagePath';
+  }
+
+  static bool _parseBool(String? raw, {required bool fallback}) {
+    if (raw == null) return fallback;
+    final v = raw.trim().toLowerCase();
+    if (v.isEmpty) return fallback;
+    if (v == 'true' || v == '1' || v == 'yes' || v == 'y') return true;
+    if (v == 'false' || v == '0' || v == 'no' || v == 'n') return false;
+    return fallback;
   }
 }

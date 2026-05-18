@@ -3,6 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/burger.dart';
 import '../models/promo.dart';
 
+enum PromoDeleteResult { deleted, deactivated }
+
 class SupabaseService {
   static final SupabaseService _instance = SupabaseService._internal();
   factory SupabaseService() => _instance;
@@ -197,13 +199,41 @@ class SupabaseService {
     return Promo.fromProductoRow(data);
   }
 
-  Future<void> deletePromocion(String id) async {
+  /// Borra una promo. Si falla (por ejemplo, por políticas/RLS), intenta
+  /// desactivarla (activa=false) para que NO se muestre a los clientes.
+  ///
+  /// Retorna:
+  /// - [PromoDeleteResult.deleted] si se borró.
+  /// - [PromoDeleteResult.deactivated] si no se pudo borrar pero sí desactivar.
+  ///
+  /// Lanza excepción si no pudo hacer ninguna de las dos.
+  Future<PromoDeleteResult> deletePromocion(String id) async {
+    try {
+      if (await _tablaPromocionesDisponible()) {
+        await client.from('promociones').delete().eq('id', id);
+        return PromoDeleteResult.deleted;
+      }
+      final dynamic idValue = int.tryParse(id) ?? id;
+      await client.from('productos').delete().eq('id', idValue);
+      return PromoDeleteResult.deleted;
+    } catch (_) {
+      await deactivatePromocion(id);
+      return PromoDeleteResult.deactivated;
+    }
+  }
+
+  Future<void> deactivatePromocion(String id) async {
     if (await _tablaPromocionesDisponible()) {
-      await client.from('promociones').delete().eq('id', id);
+      await client.from('promociones').update({'activa': false}).eq('id', id);
       return;
     }
+
+    // Fallback: promos guardadas como fila en `productos`.
     final dynamic idValue = int.tryParse(id) ?? id;
-    await client.from('productos').delete().eq('id', idValue);
+    final row =
+        await client.from('productos').select().eq('id', idValue).single();
+    final promo = Promo.fromProductoRow(row).copyWith(activa: false);
+    await updatePromocion(promo);
   }
 
   // ==================== PEDIDOS ====================

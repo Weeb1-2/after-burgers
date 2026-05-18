@@ -13,23 +13,28 @@ class PromoRepository {
   final SupabaseService _supabase = SupabaseService();
 
   Future<void> ensureInitialized() async {
-    final remote = await _fetchRemote();
-    if (remote.isNotEmpty) {
+    final remote = await _fetchRemoteNullable();
+    if (remote != null) {
+      // Si Supabase está disponible, lo remoto manda (aunque sea lista vacía).
       await _saveLocal(remote);
       return;
     }
-    if ((await _loadLocal()).isEmpty) {
+
+    // Solo sembramos promos demo si NO hay conexión a Supabase y estamos en debug.
+    if (kDebugMode && (await _loadLocal()).isEmpty) {
       await _seedInicial();
-      debugPrint('Promos demo creadas localmente');
+      debugPrint('Promos demo creadas localmente (debug)');
     }
   }
 
   Future<List<Promo>> getAll() async {
-    final remote = await _fetchRemote();
-    if (remote.isNotEmpty) {
+    final remote = await _fetchRemoteNullable();
+    if (remote != null) {
+      // Si Supabase responde, incluso sin promos, reemplazamos el cache local.
       await _saveLocal(remote);
       return remote;
     }
+
     await ensureInitialized();
     return _loadLocal();
   }
@@ -80,23 +85,33 @@ class PromoRepository {
     }
   }
 
-  Future<void> delete(String id) async {
+  /// Elimina una promo y devuelve el resultado de sincronización.
+  ///
+  /// - Si Supabase permite DELETE → [PromoDeleteResult.deleted]
+  /// - Si DELETE falla pero UPDATE funciona → [PromoDeleteResult.deactivated]
+  /// - Si Supabase no está disponible / sin permisos → null (solo se borra local)
+  Future<PromoDeleteResult?> delete(String id) async {
+    PromoDeleteResult? syncedResult;
     try {
-      await _supabase.deletePromocion(id);
+      syncedResult = await _supabase.deletePromocion(id);
     } catch (e) {
       debugPrint('Eliminar en Supabase falló: $e');
     }
     final lista = await _loadLocal();
     lista.removeWhere((p) => p.id == id);
     await _saveLocal(lista);
+    return syncedResult;
   }
 
-  Future<List<Promo>> _fetchRemote() async {
+  /// Devuelve:
+  /// - Lista (posiblemente vacía) cuando Supabase está disponible.
+  /// - null cuando NO se pudo acceder a Supabase (offline/credenciales/policies).
+  Future<List<Promo>?> _fetchRemoteNullable() async {
     try {
       return await _supabase.getPromociones();
     } catch (e) {
       debugPrint('Promos remotas no disponibles: $e');
-      return [];
+      return null;
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../config/constants.dart';
 import '../models/promo.dart';
 import '../services/promo_repository.dart';
+import '../services/supabase_service.dart';
 
 class PromosAdminPanel extends StatefulWidget {
   const PromosAdminPanel({super.key});
@@ -17,6 +18,7 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
   final _repo = PromoRepository();
   List<Promo> _promos = [];
   bool _cargando = true;
+  bool _mostrarPausadas = false;
 
   @override
   void initState() {
@@ -30,7 +32,7 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
       final lista = await _repo.getAll();
       if (mounted) {
         setState(() {
-          _promos = lista;
+          _promos = _mostrarPausadas ? lista : lista.where((p) => p.activa).toList();
           _cargando = false;
         });
       }
@@ -74,8 +76,32 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
     if (ok != true || !mounted) return;
 
     try {
-      await _repo.delete(promo.id);
+      final res = await _repo.delete(promo.id);
       await _cargar();
+      if (!mounted) return;
+
+      if (res == PromoDeleteResult.deleted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Promo eliminada'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (res == PromoDeleteResult.deactivated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo borrar en Supabase. Se desactivó para que no se vea.'),
+            backgroundColor: Colors.amber,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Se eliminó solo en este dispositivo (Supabase no respondió / sin permisos).'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -122,6 +148,14 @@ class _PromosAdminPanelState extends State<PromosAdminPanel> {
         backgroundColor: Colors.black,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _cargar),
+          IconButton(
+            tooltip: _mostrarPausadas ? 'Ocultar pausadas' : 'Mostrar pausadas',
+            icon: Icon(_mostrarPausadas ? Icons.visibility : Icons.visibility_off),
+            onPressed: () {
+              setState(() => _mostrarPausadas = !_mostrarPausadas);
+              _cargar();
+            },
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

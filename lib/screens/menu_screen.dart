@@ -136,6 +136,10 @@ class _MainMenuEvoState extends State<MainMenuEvo>
       PromoCalculator.calculate(carrito, promosActivas);
 
   Future<void> _cargarPromociones() async {
+    if (!EnvConfig.promosEnabled) {
+      if (mounted) setState(() => promosActivas = []);
+      return;
+    }
     try {
       final promos = await PromoRepository().getActivas();
       if (mounted) setState(() => promosActivas = promos);
@@ -628,7 +632,7 @@ class _MainMenuEvoState extends State<MainMenuEvo>
     mensaje += "🎖️ *NIVEL:* $rangoActual\n";
     mensaje +=
         "⏰ *HORA:* ${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')} hs\n";
-    if (promosActivas.isNotEmpty) {
+    if (EnvConfig.promosEnabled && promosActivas.isNotEmpty) {
       mensaje += "🎁 *PROMOS VIGENTES:*\n";
       for (final promo in promosActivas) {
         mensaje += "• ${promo.titulo}: ${promo.descripcion}\n";
